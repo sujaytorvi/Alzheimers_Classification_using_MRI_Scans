@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRI Brain Image Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo-container">
+            <img src="https://1000logos.net/wp-content/uploads/2022/07/Northeastern-University-Logo.png" alt="Northeastern University Logo" class="logo">
+        </div>
+        <div class="logo-container-right">
+            <img src="https://i.ibb.co/bRKwGRY/cloudport.png" alt="Cloudport Logo" class="logo-right">
+        </div>
+    </nav>
+    
+    <!-- Hero Image Section -->
+    <header class="hero-section">
+        <img src="{{ url_for('static', filename='path_to_your_hero_image') }}" alt="Hero Image">
+        <div class="hero-text">
+            <h1>Welcome to MRI Brain Image Analyzer</h1>
+            <p>Leading the way in medical imaging analysis</p>
+        </div>
+    </header>
+
+    <!-- Tab Links -->
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'Alzheimers')" id="defaultOpen">Alzheimer's Disease</button>
+        <button class="tablinks" onclick="openTab(event, 'BrainTumor')">Brain Tumor</button>
+    </div>
+    <p></p>
+    <br>
+    <br>
+    <!-- Tab Content for Alzheimer's -->
+    <div id="Alzheimers" class="tabcontent">
+        <section class="upload-section">
+            <h2>Analyze Your MRI Scan for Alzheimer's Disease</h2>
+            <p>Please upload an MRI image for analysis. Our system will evaluate it and provide results shortly.</p>
+            <form enctype="multipart/form-data">
+                <input type="file" id="alzImageUpload" name="alzFile" accept="image/*">
+                <button class="upload-btn" type="button" onclick="analyzeAlzheimers()">Analyze</button>
+            </form>
+        </section>
+        
+        <section class="preview-section">
+            <h3>Image Preview</h3>
+            <div id="alzPreviewImageContainer" class="image-container"></div>
+        </section>
+        
+        <section class="result-section">
+            <h3>Analysis Results</h3>
+            <div id="alzResultContainer" class="result-container"></div>
+        </section>
+    </div>
+
+    <!-- Tab Content for Brain Tumor -->
+    <div id="BrainTumor" class="tabcontent">
+        <section class="upload-section">
+            <h2>Analyze Your MRI Scan for Brain Tumor</h2>
+            <p>Please upload an MRI image for analysis. Our system will evaluate it and provide a yes or no result.</p>
+            <form enctype="multipart/form-data">
+                <input type="file" id="tumorImageUpload" name="tumorFile" accept="image/*">
+                <button class="upload-btn" type="button" onclick="analyzeBrainTumor()">Analyze</button>
+            </form>
+        </section>
+        
+        <section class="preview-section">
+            <h3>Image Preview</h3>
+            <div id="tumorPreviewImageContainer" class="image-container"></div>
+        </section>
+        
+        <section class="result-section">
+            <h3>Analysis Results</h3>
+            <div id="tumorResultContainer" class="result-container"></div>
+        </section>
+    </div>
+    
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; <script>document.write(new Date().getFullYear());</script> </p>
+    </footer>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        document.getElementById("defaultOpen").click();
+        
+        function analyzeAlzheimers() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('alzImageUpload');
+            var file = fileInput.files[0];
+            formData.append('file', file);
+            formData.append('analysis_type', 'alzheimer'); // Add analysis type to form data
+        
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    var resultContainer = $('#alzResultContainer');
+                    resultContainer.empty(); // Clear previous results
+                    resultContainer.append(`<div class='result-card'>${data.prediction}</div>`);
+                },
+                error: function() {
+                    $('#alzResultContainer').html("<div class='result-card'>Error in prediction. Please try again.</div>");
+                }
+            });
+        
+            previewImage('alzImageUpload', 'alzPreviewImageContainer'); // Preview the image
+        }
+        
+        function analyzeBrainTumor() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('tumorImageUpload');
+            var file = fileInput.files[0];
+            formData.append('file', file);
+            formData.append('analysis_type', 'brain_tumor'); // Add analysis type to form data
+        
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    var resultContainer = $('#tumorResultContainer');
+                    resultContainer.empty(); // Clear previous results
+                    resultContainer.append(`<div class='result-card'>${data.prediction}</div>`);
+                },
+                error: function() {
+                    $('#tumorResultContainer').html("<div class='result-card'>Error in prediction. Please try again.</div>");
+                }
+            });
+        
+            previewImage('tumorImageUpload', 'tumorPreviewImageContainer'); // Preview the image
+        }
+        
+        function previewImage(inputId, previewContainerId) {
+            var input = document.getElementById(inputId);
+            var previewContainer = document.getElementById(previewContainerId);
+            previewContainer.innerHTML = ''; // Clear existing content
+        
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    var img = document.createElement("img");
+                    img.src = e.target.result;
+                    previewContainer.appendChild(img);
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Remove the 'onclick' attribute from the Analyze buttons and call the functions directly in the input 'change' event
+        $('#alzImageUpload').change(analyzeAlzheimers);
+        $('#tumorImageUpload').change(analyzeBrainTumor);
+        </script>
+        
+</body>
+</html>
