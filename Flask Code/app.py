@@ -9,8 +9,8 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-ALZHEIMER_MODEL_PATH = 'C:/Users/wayne/OneDrive - Northeastern University/Desktop/MRI/mri_app/alzheimer_cnn_model_best.h5'
-BRAIN_TUMOR_MODEL_PATH = 'C:/Users/wayne/OneDrive - Northeastern University/Desktop/MRI/mri_app/brain_tumor_cnn_model.h5'
+ALZHEIMER_MODEL_PATH = '/Users/sujaymukundtorvi/Documents/Alzheimers_Classification_using_MRI_Scans/Flask Code/alzheimer_cnn_model_best.h5'
+BRAIN_TUMOR_MODEL_PATH = '/Users/sujaymukundtorvi/Documents/Alzheimers_Classification_using_MRI_Scans/Flask Code/brain_tumor_cnn_model.h5'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALZHEIMER_MODEL_PATH'] = ALZHEIMER_MODEL_PATH
@@ -51,10 +51,10 @@ def upload_file():
     if analysis_type == 'alzheimer':
         predictions = alzheimer_model.predict(img_array)
         predicted_class_index = np.argmax(predictions, axis=1)[0]
-        predicted_class = ['MildDementia', 'ModerateDementia', 'NonDementia', 'VeryMildDementia'][predicted_class_index]
+        predicted_class = ['Mild Dementia', 'Moderate Dementia', 'Non Dementia', 'Very Mild Dementia'][predicted_class_index]
     elif analysis_type == 'brain_tumor':
         predictions = brain_tumor_model.predict(img_array)
-        predicted_class = 'Yes' if predictions[0][0] > 0.5 else 'No'  # Assuming binary classification with a sigmoid output
+        predicted_class = 'No Tumor Detected' if predictions[0][0] > 0.5 else 'Tumor Detected'  # Assuming binary classification with a sigmoid output
     
     return jsonify({'prediction': str(predicted_class)})
 
